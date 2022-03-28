@@ -69,6 +69,7 @@ int main(){
         for (int j = 0; j < 8; j++){
             a[i*N + j] = (double)rand() / RAND_MAX;
         }
+        ind[i] = i; //Optimizacion inicializacion
     }
 
     // Inicialización de b
@@ -76,18 +77,7 @@ int main(){
         for (j = 0; j < N; j++){
             b[i*8 + j] = (double)rand() / RAND_MAX;
         }
-        c[i] = (double)rand() / RAND_MAX;
-    }
-
-    // Inicialización de c
-    /*for (i = 0; i < 8; i++){
-        c[i] = (double)rand() / RAND_MAX;
-    }*/
-
-    // Inicialización del vector de índices
-    for (i = 0; i < N; i++)
-    {
-        ind[i] = i;  
+        c[i] = (double)rand() / RAND_MAX; //Optimizacion inicializacion
     }
 
     //Aleatorizacion del vector de indices
@@ -102,14 +92,16 @@ int main(){
     start_counter();
 
     // Inicialización de d
+    /*
     for (i = 0; i < N; i++){ //filas
         for (j = 0; j < N; j++){ // columnas
             d[i*N + j] = 0;
         }
-    }
+    }*/
 
     for (i = 0; i < N; i++){
         for (j = 0; j < N; j++){
+            d[i*N + j] = 0;     //Inicializacion de d
             for (k = 0; k < 8; k++){
                 d[i*N + j] += 2*a[i*N + k]*(b[k*8 + j]-c[k]);
             }
