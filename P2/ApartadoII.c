@@ -3,7 +3,7 @@
 #include <pmmintrin.h>
 #include <unistd.h>
 
-#define N 10
+#define N 100
 
 void start_counter();
 double get_counter();
@@ -100,10 +100,12 @@ int main(){
     }*/
 
     for (i = 0; i < N; i++){
-        for (j = 0; j < N; j++){
+        for (j = 0; j < N; j+=2){
             d[i*N + j] = 0;     //Inicializacion de d
-            for (k = 0; k < 8; k++){
-                d[i*N + j] += 2*a[i*N + k]*(b[k*8 + j]-c[k]);
+            for (k = 0; k < 8; k+=4){
+                d[i*N + j] += 2*a[i*N + k+1]*(b[k*8 + j]-c[k]);
+                d[i*N + j] += 2*a[i*N +k+1]*(b[(k+1)*8 +j]-c[k]);
+
             }
         }
     }

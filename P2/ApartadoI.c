@@ -3,7 +3,7 @@
 #include <pmmintrin.h>
 #include <unistd.h>
 
-#define N 10
+#define N 100
 
 void start_counter();
 double get_counter();
