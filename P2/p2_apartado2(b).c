@@ -3,7 +3,7 @@
 #include <pmmintrin.h>
 #include <unistd.h>
 
-#define N 100
+#define block_size 5
 
 void start_counter();
 double get_counter();
@@ -50,24 +50,42 @@ double get_counter();
  return result;
  }
 
-int main(){
+int main(int argc, char *argv[]){
 
-    double *a, *b, *c,*d,*e,f,ck; // Matrices y vector de entrada que almacenan valores aleatorios
-    int *ind, i, j, k;          // Vector desordenado aleatoriamente que contiene índices de fila/columna sin que se repitan
+    double **a, **b, *c,**d,*e,f,ck; // Matrices y vector de entrada que almacenan valores aleatorios
+    int *ind, i, j, k,ii,jj,r;          // Vector desordenado aleatoriamente que contiene índices de fila/columna sin que se repitan
+    int N;                      //Tamaño de la matriz
+
+    if( argc != 2 ){
+      printf("Número de argumentos incorrecto\n");
+      exit(EXIT_FAILURE);
+    }
+
+    N = atoi(argv[1]);
 
     srand(0);
 
-    a = (double *)malloc(N * 8 * sizeof(double));
-    b = (double *)malloc(N * 8 * sizeof(double));
+    a = (double **)malloc(N * sizeof(double));
+    for (i = 0; i < N; i++){
+        a[i]=(double *) malloc(8*sizeof(double));
+    }
+    
+    b = (double **)malloc(8 * sizeof(double));
+    for (i = 0; i < 8; i++){
+        b[i]=(double *) malloc(N*sizeof(double));
+    }
     c = (double *)malloc(8 * sizeof(double));
-    d = (double *)malloc(N * N * sizeof(double));
+    d = (double **)malloc(N *  sizeof(double));
+    for (i = 0; i < N; i++){
+        d[i]=(double *) malloc(N*sizeof(double));
+    }
     e = (double *)malloc(N * sizeof(double));
     ind = (int *)malloc(N * sizeof(int));
 
     // Inicialización de a
     for (i = 0; i < N; i++){
         for (int j = 0; j < 8; j++){
-            a[i*N + j] = (double)rand() / RAND_MAX;
+            a[i][j] = (double)rand() / RAND_MAX;
         }
         ind[i] = i; //Optimizacion inicializacion
     }
@@ -75,7 +93,7 @@ int main(){
     // Inicialización de b
     for (i = 0; i < 8; i++){
         for (j = 0; j < N; j++){
-            b[i*8 + j] = (double)rand() / RAND_MAX;
+            b[i][j] = (double)rand() / RAND_MAX;
         }
         c[i] = (double)rand() / RAND_MAX; //Optimizacion inicializacion
     }
@@ -88,7 +106,6 @@ int main(){
         ind[i]=ind[k];
         ind[k] = j;
     }
-
     start_counter();
 
     // Inicialización de d
@@ -99,19 +116,13 @@ int main(){
         }
     }*/
 
-    for (i = 0; i < N; i++){
-        for (j = 0; j < N; j++){
-            d[i*N + j] = 0;     //Inicializacion de d
-            for (k = 0; k < 8; k++){
-                d[i*N + j] += 2*a[i*N + k]*(b[k*8 + j]-c[k]);
-            }
-        }
-    }
-
-    for (i = 0,f=0; i < N; i+=2){
-        e[i] = d[ind[i]*N + ind[i]] / 2;
-        e[i+1] = d[ind[i+1]*N + ind[i+1]] / 2;
-        f += e[i] + e[i+1];
+    for (i = 0,f=0; i < N; i+=5){
+        e[i] = d[ind[i]][ind[i]] / 2;
+        e[i+1] = d[ind[i+1]][ind[i+1]] / 2;
+        e[i+2] = d[ind[i+2]][ind[i+2]] / 2;
+        e[i+3] = d[ind[i+3]][ind[i+3]] / 2;
+        e[i+4] = d[ind[i+4]][ind[i+4]] / 2;
+        f += e[i] + e[i+1] + e[i+2] + e[i+3] + e[i+4];
     }
 
     printf("f=%lf\n", f);

@@ -1,0 +1,80 @@
+
+Iteración con N = 250
+Apartado I
+f=98.678869
+
+Clocks=5711894.0000000000 
+Apartado II
+f=98.678869
+
+Clocks=4352394.0000000000 
+
+Iteración con N = 500
+Apartado I
+f=183.302220
+
+Clocks=24460926.0000000000 
+Apartado II
+f=183.302220
+
+Clocks=19167386.0000000000 
+
+Iteración con N = 700
+Apartado I
+f=-481.037243
+
+Clocks=50548404.0000000000 
+Apartado II
+f=-481.037243
+
+Clocks=34591178.0000000000 
+
+Iteración con N = 1000
+Apartado I
+f=-182.843662
+
+Clocks=92987418.0000000000 
+Apartado II
+f=-182.843662
+
+Clocks=70386342.0000000000 
+
+Iteración con N = 1500
+Apartado I
+f=231.011348
+
+Clocks=210335600.0000000000 
+Apartado II
+f=231.011348
+
+Clocks=162386966.0000000000 
+
+Iteración con N = 2000
+Apartado I
+f=225.554590
+
+Clocks=379150412.0000000000 
+Apartado II
+f=225.554590
+
+Clocks=292365190.0000000000 
+
+Iteración con N = 2550
+Apartado I
+f=415.510093
+
+Clocks=616272760.0000000000 
+Apartado II
+f=415.510093
+
+Clocks=477151508.0000000000 
+
+Iteración con N = 3000
+Apartado I
+f=89.477791
+
+Clocks=802625336.0000000000 
+Apartado II
+f=89.477791
+
+Clocks=617085320.0000000000 
