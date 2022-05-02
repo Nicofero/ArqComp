@@ -47,17 +47,27 @@ double get_counter();
  }
  return result;
  }
+ int compare (const void * a,const void * b){
+  return ( *(double*)a - *(double*)b );
+}
 
 int main(int argc, char *argv[]){
 
-    double **a, **b, *c,**d,*e,f,ck; // Matrices y vector de entrada que almacenan valores aleatorios
-    int *ind, i, j, k;          // Vector desordenado aleatoriamente que contiene índices de fila/columna sin que se repitan
+    double **a, **b, *c,**d,*e,f,ck[10]; // Matrices y vector de entrada que almacenan valores aleatorios
+    int *ind, i, j, k,l;          // Vector desordenado aleatoriamente que contiene índices de fila/columna sin que se repitan
     int N;                      //Tamaño de la matriz
+    FILE* p;
 
-    if( argc != 2 ){
-      printf("Número de argumentos incorrecto\n");
-      exit(EXIT_FAILURE);
+    //Comprobamos que el valor de N se haya pasado por linea de comandos
+    if (argc!=3){
+        fprintf(stderr,"ERROR: Introduce el parámetro D en linea de comandos\n");
+        exit(-1);
     }
+
+    if ((p=fopen(argv[2],"a+"))==NULL){
+        perror("ERROR: ");
+        exit (-1);
+    }    
 
     N = atoi(argv[1]);
 
@@ -117,30 +127,37 @@ int main(int argc, char *argv[]){
 
     start_counter();
 
-    // Inicialización de d
-    for (i = 0; i < N; i++){ //filas
-        for (j = 0; j < N; j++){ // columnas
-            d[i][j] = 0;
-        }
-    }
-
-    for (i = 0; i < N; i++){
-        for (j = 0; j < N; j++){
-            for (k = 0; k < 8; k++){
-                d[i][j] += 2*a[i][k]*(b[k][j]-c[k]);
+    printf("\n\nN=%d\n",N);
+    for(l=0;l<10;l++){
+        // Inicialización de d
+        for (i = 0; i < N; i++){ //filas
+            for (j = 0; j < N; j++){ // columnas
+                d[i][j] = 0;
             }
         }
+
+        for (i = 0; i < N; i++){
+            for (j = 0; j < N; j++){
+                for (k = 0; k < 8; k++){
+                    d[i][j] += 2*a[i][k]*(b[k][j]-c[k]);
+                }
+            }
+        }
+
+        
+        for (i = 0,f=0; i < N; i++){
+            e[i] = d[ind[i]][ind[i]] / 2;
+            f += e[i];
+        }
+
+        printf("f=%lf\n", f);
+
+        ck[l]=get_counter();
+
+        printf("\nClocks=%1.10lf \n",ck[l]);
     }
+    qsort(ck,10,sizeof(double),compare);
 
-    
-    for (i = 0; i < N; i++){
-        e[i] = d[ind[i]][ind[i]] / 2;
-        f += e[i];
-    }
-
-    printf("f=%lf\n", f);
-
-    ck=get_counter();
-
-    printf("\nClocks=%1.10lf \n",ck);
+    if(N!=3000)   fprintf(p,"%lf,",((ck[4]+ck[5])/2));  //Impresion archivo .r
+    else    fprintf(p,"%lf)\n",((ck[4]+ck[5])/2));
 }
