@@ -2,7 +2,12 @@
 #include <stdlib.h>
 #include <pmmintrin.h>
 #include <unistd.h>
-#include <immintrin.h>
+
+void start_counter();
+double get_counter();
+
+/* Initialize the cycle counter */
+
 
  static unsigned cyc_hi = 0;
  static unsigned cyc_lo = 0;
@@ -86,9 +91,9 @@ int main(int argc, char *argv[]){
         a[i]=(double *) malloc(8*sizeof(double));
     }
     
-    b = (double **)malloc(8 * sizeof(double));
-    for (i = 0; i < 8; i++){
-        b[i]=(double *) malloc(N*sizeof(double));
+    b = (double **)malloc(N * sizeof(double));
+    for (i = 0; i < N; i++){
+        b[i]=(double *) malloc(8*sizeof(double));
     }
     c = (double *)malloc(8 * sizeof(double));
     d = (double **)malloc(N *  sizeof(double));
@@ -109,11 +114,11 @@ int main(int argc, char *argv[]){
     // Inicialización de b
     for (i = 0; i < 8; i++){
         for (j = 0; j < N; j++){
-            b[i][j] = (double)rand() / RAND_MAX;
+            b[j][i] = (double)rand() / RAND_MAX;
         }
         c[i] = (double)rand() / RAND_MAX; //Optimizacion inicializacion
     }
-
+    printf("HOLA\n");
     //Aleatorizacion del vector de indices
     for(i=0;i<N;i++){
         k = rand()%N;
@@ -122,6 +127,9 @@ int main(int argc, char *argv[]){
         ind[i]=ind[k];
         ind[k] = j;
     }
+    transpose(b,N);
+    for(i=0;i<N;i++)for(j=0;j<8;j++) printf("%lf",b[i][j]);
+
     printf("N=%d\n",N);
     for(l=0;l<10;l++){
         start_counter();
@@ -138,14 +146,14 @@ int main(int argc, char *argv[]){
             for (j = 0; j < N; j++){
                 d[i][j] = 0;     //Inicializacion de d
                 //Unrolling del bucle interior
-                d[i][j] += 2*a[i][0]*(b[0][j]-c[0]);
-                d[i][j] += 2*a[i][(1)]*(b[(1)][j]-c[(1)]);
-                d[i][j] += 2*a[i][(2)]*(b[(2)][j]-c[(2)]);
-                d[i][j] += 2*a[i][(3)]*(b[(3)][j]-c[(3)]);
-                d[i][j] += 2*a[i][(4)]*(b[(4)][j]-c[(4)]);
-                d[i][j] += 2*a[i][(5)]*(b[(5)][j]-c[(5)]);
-                d[i][j] += 2*a[i][(6)]*(b[(6)][j]-c[(6)]);
-                d[i][j] += 2*a[i][(7)]*(b[(7)][j]-c[(7)]);
+                d[i][j] += 2*a[i][0]*(b[j][0]-c[0]);
+                d[i][j] += 2*a[i][(1)]*(b[(j)][1]-c[(1)]);
+                d[i][j] += 2*a[i][(2)]*(b[(j)][2]-c[(2)]);
+                d[i][j] += 2*a[i][(3)]*(b[(j)][3]-c[(3)]);
+                d[i][j] += 2*a[i][(4)]*(b[(j)][4]-c[(4)]);
+                d[i][j] += 2*a[i][(5)]*(b[(j)][5]-c[(5)]);
+                d[i][j] += 2*a[i][(6)]*(b[(j)][6]-c[(6)]);
+                d[i][j] += 2*a[i][(7)]*(b[(j)][7]-c[(7)]);
 
             }
         }
