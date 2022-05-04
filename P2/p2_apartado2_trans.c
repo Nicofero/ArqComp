@@ -114,7 +114,7 @@ int main(int argc, char *argv[]){
     // Inicialización de b
     for (i = 0; i < 8; i++){
         for (j = 0; j < N; j++){
-            b[j][i] = (double)rand() / RAND_MAX;
+            b[i][j] = (double)rand() / RAND_MAX;
         }
         c[i] = (double)rand() / RAND_MAX; //Optimizacion inicializacion
     }

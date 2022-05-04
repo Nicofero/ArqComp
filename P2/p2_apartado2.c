@@ -52,6 +52,14 @@ double get_counter();
   return ( *(double*)a - *(double*)b );
 }
 
+void free_2p(double **A,int fil,int col){
+    int i,j;
+    for(i=0;i<fil;i++){
+        free(A[i]);
+    }
+    free(A);
+}
+
 int main(int argc, char *argv[]){
 
     double **a, **b, *c,**d,*e,f,ck[10]; // Matrices y vector de entrada que almacenan valores aleatorios
@@ -115,6 +123,8 @@ int main(int argc, char *argv[]){
         ind[i]=ind[k];
         ind[k] = j;
     }
+
+    //for(j=0;j<8;j++){for(i=0;i<N;i++) {printf("%lf ",b[j][i]);} printf("\n");}
     printf("N=%d\n",N);
     for(l=0;l<10;l++){
         start_counter();
@@ -140,8 +150,11 @@ int main(int argc, char *argv[]){
                 d[i][j] += 2*a[i][(6)]*(b[(6)][j]-c[(6)]);
                 d[i][j] += 2*a[i][(7)]*(b[(7)][j]-c[(7)]);
 
+                if(l==0) for(k=0;k<4;k++) printf("res=%lf\n",(b[k][j]-c[k]));
+
             }
         }
+        //printf("res=%lf\n",d[4][34]);
 
         for (i = 0,f=0; i < N; i+=5){
             e[i] = d[ind[i]][ind[i]] / 2;
@@ -152,15 +165,22 @@ int main(int argc, char *argv[]){
             f += e[i] + e[i+1] + e[i+2] + e[i+3] + e[i+4];
         }
 
-        printf("f=%lf\n", f);
+        //printf("f=%lf\n", f);
 
         ck[l]=get_counter();
 
-        printf("\nClocks=%1.10lf \n",ck[l]);
+        //printf("\nClocks=%1.10lf \n",ck[l]);
         
     }
     qsort(ck,10,sizeof(double),compare);
 
     if(N!=3000)   fprintf(p,"%lf,",((ck[4]+ck[5])/2));  //Impresion archivo .r
     else    fprintf(p,"%lf)\n",((ck[4]+ck[5])/2));
+
+    //Liberacion de memoria
+    free_2p(a,N,8);
+    free_2p(b,8,N);
+    free(c);
+    free_2p(d,N,N);
+    free(e);
 }

@@ -47,23 +47,21 @@
   return ( *(double*)a - *(double*)b );
 }
 
- void transpose(double **A,int N){
+void free_2p(double **A,int fil,int col){
     int i,j;
-    double aux;
-    for(i=0;i<N;i++){
-        for(j=i;j<8;j++){
-            aux=A[j][i];
-            A[j][i]=A[i][j];
-            A[i][j]=aux;
-        }
+    for(i=0;i<fil;i++){
+        free(A[i]);
     }
- }
+    free(A);
+}
+
 
 int main(int argc, char *argv[]){
 
-    double **a, **b, *c,**d,*e,f,ck[10]; // Matrices y vector de entrada que almacenan valores aleatorios
+    double **a, **b, *c,**d,*e,f,ck[10],*twd,*hlf; // Matrices y vector de entrada que almacenan valores aleatorios
     int *ind, i, j, k,l;          // Vector desordenado aleatoriamente que contiene índices de fila/columna sin que se repitan
     int N;                      //Tamaño de la matriz
+    __m256d aa,bb,cc,r,tw,hl;
     FILE* p;
 
     //Comprobamos que el valor de N se haya pasado por linea de comandos
@@ -81,16 +79,16 @@ int main(int argc, char *argv[]){
 
     srand(0);
 
-    a = (double **)malloc(N * sizeof(double));
+    a = (double **)aligned_alloc(32,N * sizeof(double));
     for (i = 0; i < N; i++){
-        a[i]=(double *) malloc(8*sizeof(double));
+        a[i]=(double *) aligned_alloc(32,8*sizeof(double));
     }
     
-    b = (double **)malloc(8 * sizeof(double));
-    for (i = 0; i < 8; i++){
-        b[i]=(double *) malloc(N*sizeof(double));
+    b = (double **)aligned_alloc(32,N * sizeof(double));
+    for (i = 0; i < N; i++){
+        b[i]=(double *) aligned_alloc(32,8*sizeof(double));
     }
-    c = (double *)malloc(8 * sizeof(double));
+    c = (double *)aligned_alloc(32,8 * sizeof(double));
     d = (double **)malloc(N *  sizeof(double));
     for (i = 0; i < N; i++){
         d[i]=(double *) malloc(N*sizeof(double));
@@ -100,7 +98,7 @@ int main(int argc, char *argv[]){
 
     // Inicialización de a
     for (i = 0; i < N; i++){
-        for (int j = 0; j < 8; j++){
+        for (j = 0; j < 8; j++){
             a[i][j] = (double)rand() / RAND_MAX;
         }
         ind[i] = i; //Optimizacion inicializacion
@@ -109,7 +107,7 @@ int main(int argc, char *argv[]){
     // Inicialización de b
     for (i = 0; i < 8; i++){
         for (j = 0; j < N; j++){
-            b[i][j] = (double)rand() / RAND_MAX;
+            b[j][i] = (double)rand() / RAND_MAX;
         }
         c[i] = (double)rand() / RAND_MAX; //Optimizacion inicializacion
     }
@@ -122,10 +120,18 @@ int main(int argc, char *argv[]){
         ind[i]=ind[k];
         ind[k] = j;
     }
+
+    twd = (double*)aligned_alloc(32,4*sizeof(double));
+    hlf = (double*)aligned_alloc(32,4*sizeof(double));
+    for(i=0;i<4;i++){    twd[i]=2.0;    hlf[i]=0.5;}
+
+    tw = _mm256_load_pd(twd);
+    hl = _mm256_load_pd(hlf);
+    
     printf("N=%d\n",N);
     for(l=0;l<10;l++){
         start_counter();
-
+        
         // Inicialización de d
         /*
         for (i = 0; i < N; i++){ //filas
@@ -137,19 +143,29 @@ int main(int argc, char *argv[]){
         for (i = 0; i < N; i++){
             for (j = 0; j < N; j++){
                 d[i][j] = 0;     //Inicializacion de d
-                //Unrolling del bucle interior
-                d[i][j] += 2*a[i][0]*(b[0][j]-c[0]);
-                d[i][j] += 2*a[i][(1)]*(b[(1)][j]-c[(1)]);
-                d[i][j] += 2*a[i][(2)]*(b[(2)][j]-c[(2)]);
-                d[i][j] += 2*a[i][(3)]*(b[(3)][j]-c[(3)]);
-                d[i][j] += 2*a[i][(4)]*(b[(4)][j]-c[(4)]);
-                d[i][j] += 2*a[i][(5)]*(b[(5)][j]-c[(5)]);
-                d[i][j] += 2*a[i][(6)]*(b[(6)][j]-c[(6)]);
-                d[i][j] += 2*a[i][(7)]*(b[(7)][j]-c[(7)]);
+                
+                aa = _mm256_load_pd(&a[i][0]);
+                bb = _mm256_load_pd(&b[j][0]);
+                cc = _mm256_load_pd(&c[0]);
+                
 
+                r = _mm256_sub_pd (bb,cc);
+                aa = _mm256_mul_pd(aa,tw);
+                r = _mm256_mul_pd(aa,r);               
+
+                d[i][j] += r[0] + r[1] + r[2] + r[3];
+
+                aa = _mm256_load_pd(&a[i][4]);
+                bb = _mm256_load_pd(&b[j][4]);
+                cc = _mm256_load_pd(&c[4]);            
+
+                r = _mm256_sub_pd (bb,cc);
+                aa = _mm256_mul_pd(aa,tw);
+                r = _mm256_mul_pd(aa,r);
+
+                d[i][j] += r[0] + r[1] + r[2] + r[3];
             }
         }
-
         for (i = 0,f=0; i < N; i+=5){
             e[i] = d[ind[i]][ind[i]] / 2;
             e[i+1] = d[ind[i+1]][ind[i+1]] / 2;
@@ -170,4 +186,13 @@ int main(int argc, char *argv[]){
 
     if(N!=3000)   fprintf(p,"%lf,",((ck[4]+ck[5])/2));  //Impresion archivo .r
     else    fprintf(p,"%lf)\n",((ck[4]+ck[5])/2));
+
+    //Liberacion de memoria
+    free_2p(a,N,8);
+    free_2p(b,8,N);
+    free(c);
+    free_2p(d,N,N);
+    free(e);
+    free(twd);
+    free(hlf);
 }
