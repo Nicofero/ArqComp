@@ -68,7 +68,7 @@ int main(int argc, char *argv[]){
 
     //Comprobamos que el valor de N se haya pasado por linea de comandos
     if (argc!=3){
-        fprintf(stderr,"ERROR: Introduce el parámetro D en linea de comandos\n");
+        fprintf(stderr,"ERROR: Los argumentos deben introducirse en este orden: N(tamaño de los vectores y matriz) archivo_de_salida\n");
         exit(-1);
     }
 
@@ -113,11 +113,6 @@ int main(int argc, char *argv[]){
         c[i] = (double)rand() / RAND_MAX;
     }
 
-    // Inicialización de c
-    /*for (i = 0; i < 8; i++){
-        c[i] = (double)rand() / RAND_MAX;
-    }*/
-
     // Inicialización del vector de índices
     for (i = 0; i < N; i++)
     {
@@ -158,13 +153,14 @@ int main(int argc, char *argv[]){
             f += e[i];
         }
 
-        printf("f=%lf\n", f);
+        
 
         ck[l]=get_counter();
-
-        printf("\nClocks=%1.10lf \n",ck[l]);
     }
     qsort(ck,10,sizeof(double),compare);
+
+    printf("f=%lf\n", f);
+    printf("\nClocks=%1.10lf \n",((ck[4]+ck[5])/2));
 
     if(N!=3000)   fprintf(p,"%lf,",((ck[4]+ck[5])/2));  //Impresion archivo .r
     else    fprintf(p,"%lf)\n",((ck[4]+ck[5])/2));

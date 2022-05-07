@@ -66,7 +66,7 @@ int main(int argc, char *argv[]){
 
     //Comprobamos que el valor de N se haya pasado por linea de comandos
     if (argc!=3){
-        fprintf(stderr,"ERROR: Introduce el parámetro D en linea de comandos\n");
+        fprintf(stderr,"ERROR: Los argumentos deben introducirse en este orden: N(tamaño de los vectores y matriz) archivo_de_salida\n");
         exit(-1);
     }
 
@@ -132,14 +132,6 @@ int main(int argc, char *argv[]){
     for(l=0;l<10;l++){
         start_counter();
         
-        // Inicialización de d
-        /*
-        for (i = 0; i < N; i++){ //filas
-            for (j = 0; j < N; j++){ // columnas
-                d[i*N + j] = 0;
-            }
-        }*/
-
         for (i = 0; i < N; i++){
             for (j = 0; j < N; j++){
                 d[i][j] = 0;     //Inicializacion de d
@@ -167,6 +159,7 @@ int main(int argc, char *argv[]){
             }
         }
         for (i = 0,f=0; i < N; i+=5){
+            //Realizar este bucle mediante procesamiento vectorial no produce ninguna mejora con respecto a este modo
             e[i] = d[ind[i]][ind[i]] / 2;
             e[i+1] = d[ind[i+1]][ind[i+1]] / 2;
             e[i+2] = d[ind[i+2]][ind[i+2]] / 2;
@@ -175,14 +168,13 @@ int main(int argc, char *argv[]){
             f += e[i] + e[i+1] + e[i+2] + e[i+3] + e[i+4];
         }
 
-        printf("f=%lf\n", f);
-
         ck[l]=get_counter();
-
-        printf("\nClocks=%1.10lf \n",ck[l]);
         
     }
     qsort(ck,10,sizeof(double),compare);
+
+    printf("f=%lf\n", f);
+    printf("\nClocks=%1.10lf \n",((ck[4]+ck[5])/2));
 
     if(N!=3000)   fprintf(p,"%lf,",((ck[4]+ck[5])/2));  //Impresion archivo .r
     else    fprintf(p,"%lf)\n",((ck[4]+ck[5])/2));

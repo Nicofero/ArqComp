@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <pmmintrin.h>
 #include <unistd.h>
+#include <omp.h>
 
 void start_counter();
 double get_counter();
@@ -63,13 +64,12 @@ void free_2p(double **A,int fil,int col){
 int main(int argc, char *argv[]){
 
     double **a, **b, *c,**d,*e,f,ck[10]; // Matrices y vector de entrada que almacenan valores aleatorios
-    int *ind, i, j, k,l;          // Vector desordenado aleatoriamente que contiene índices de fila/columna sin que se repitan
-    int N;                      //Tamaño de la matriz
+    int *ind, i, j, k,l,N,nT;        //Tamaño de la matriz
     FILE* p;
 
     //Comprobamos que el valor de N se haya pasado por linea de comandos
-    if (argc!=3){
-        fprintf(stderr,"ERROR: Los argumentos deben introducirse en este orden: N(tamaño de los vectores y matriz) archivo_de_salida\n");
+    if (argc!=4){
+        fprintf(stderr,"ERROR: Los argumentos deben introducirse en este orden: N(tamaño de los vectores y matriz) archivo_de_salida nT(numero de threads)\n");
         exit(-1);
     }
 
@@ -79,6 +79,7 @@ int main(int argc, char *argv[]){
     }    
 
     N = atoi(argv[1]);
+    nT = atoi(argv[3]);
 
     srand(0);
 
@@ -125,11 +126,21 @@ int main(int argc, char *argv[]){
         ind[k] = j;
     }
 
+    //for(j=0;j<8;j++){for(i=0;i<N;i++) {printf("%lf ",b[j][i]);} printf("\n");}
     printf("N=%d\n",N);
     for(l=0;l<10;l++){
         start_counter();
 
-
+        // Inicialización de d
+        /*
+        for (i = 0; i < N; i++){ //filas
+            for (j = 0; j < N; j++){ // columnas
+                d[i*N + j] = 0;
+            }
+        }*/
+        #pragma omp parallel private(i,j) num_threads(nT)
+        {
+        #pragma omp for //podria usarse #pragma omp for collapse(2), pero tras varias pruebas vimos que esto era mas ligeramente mas rapido
         for (i = 0; i < N; i++){
             for (j = 0; j < N; j++){
                 d[i][j] = 0;     //Inicializacion de d
@@ -145,14 +156,20 @@ int main(int argc, char *argv[]){
 
             }
         }
-
-        for (i = 0,f=0; i < N; i+=5){
+        }
+        f=0;
+        #pragma omp parallel num_threads(nT)
+        {           
+        #pragma omp for
+        for (i = 0; i < N; i+=5){
             e[i] = d[ind[i]][ind[i]] / 2;
             e[i+1] = d[ind[i+1]][ind[i+1]] / 2;
             e[i+2] = d[ind[i+2]][ind[i+2]] / 2;
             e[i+3] = d[ind[i+3]][ind[i+3]] / 2;
             e[i+4] = d[ind[i+4]][ind[i+4]] / 2;
+            #pragma omp atomic
             f += e[i] + e[i+1] + e[i+2] + e[i+3] + e[i+4];
+        }
         }
 
         ck[l]=get_counter();
