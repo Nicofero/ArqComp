@@ -58,10 +58,10 @@ void free_2p(double **A,int fil,int col){
 
 int main(int argc, char *argv[]){
 
-    double **a, **b, *c,**d,*e,f,ck[10],*twd,*hlf; // Matrices y vector de entrada que almacenan valores aleatorios
+    double **a, **b, *c,**d,*e,f,ck[10],*twd; // Matrices y vector de entrada que almacenan valores aleatorios
     int *ind, i, j, k,l;          // Vector desordenado aleatoriamente que contiene índices de fila/columna sin que se repitan
     int N;                      //Tamaño de la matriz
-    __m256d aa,bb,cc,r,tw,hl;
+    __m256d aa,bb,cc,r,tw,r2;
     FILE* p;
 
     //Comprobamos que el valor de N se haya pasado por linea de comandos
@@ -122,11 +122,9 @@ int main(int argc, char *argv[]){
     }
 
     twd = (double*)aligned_alloc(32,4*sizeof(double));
-    hlf = (double*)aligned_alloc(32,4*sizeof(double));
-    for(i=0;i<4;i++){    twd[i]=2.0;    hlf[i]=0.5;}
+    for(i=0;i<4;i++)   twd[i]=2.0;    
 
     tw = _mm256_load_pd(twd);
-    hl = _mm256_load_pd(hlf);
     
     printf("N=%d\n",N);
     for(l=0;l<10;l++){
@@ -136,26 +134,29 @@ int main(int argc, char *argv[]){
             for (j = 0; j < N; j++){
                 d[i][j] = 0;     //Inicializacion de d
                 
-                aa = _mm256_load_pd(&a[i][0]);
+                //Cargamos los 4 primeros datos del bucle desenrrollado utilizado en el ejercicio anterior 
+                aa = _mm256_load_pd(&a[i][0]);  
                 bb = _mm256_load_pd(&b[j][0]);
                 cc = _mm256_load_pd(&c[0]);
                 
-
+                //Realizamos las operaciones con los primeros 4 elementos y lo almacenamos en r
                 r = _mm256_sub_pd (bb,cc);
                 aa = _mm256_mul_pd(aa,tw);
                 r = _mm256_mul_pd(aa,r);               
 
-                d[i][j] += r[0] + r[1] + r[2] + r[3];
-
+                //Cargamos los segundos 4 datos del bucle desarrollado
                 aa = _mm256_load_pd(&a[i][4]);
                 bb = _mm256_load_pd(&b[j][4]);
                 cc = _mm256_load_pd(&c[4]);            
 
-                r = _mm256_sub_pd (bb,cc);
+                //Realizamos las operaciones con los primeros 4 elementos y lo almacenamos en r2    
+                r2 = _mm256_sub_pd (bb,cc);
                 aa = _mm256_mul_pd(aa,tw);
-                r = _mm256_mul_pd(aa,r);
+                r2 = _mm256_mul_pd(aa,r2);
 
-                d[i][j] += r[0] + r[1] + r[2] + r[3];
+                r= _mm256_add_pd(r,r2); //Sumamos r y r2
+
+                d[i][j] += r[0] + r[1] + r[2] + r[3];   //Sumamos los elementos de r lo que nos da el resultado
             }
         }
         for (i = 0,f=0; i < N; i+=5){
@@ -186,5 +187,4 @@ int main(int argc, char *argv[]){
     free_2p(d,N,N);
     free(e);
     free(twd);
-    free(hlf);
 }
