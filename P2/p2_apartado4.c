@@ -140,7 +140,7 @@ int main(int argc, char *argv[]){
         }*/
         #pragma omp parallel private(i,j) num_threads(nT)
         {
-        #pragma omp for //podria usarse #pragma omp for collapse(2), pero tras varias pruebas vimos que esto era mas ligeramente mas rapido
+        #pragma omp for//podria usarse #pragma omp for collapse(2), pero tras varias pruebas vimos que esto era mas ligeramente mas rapido
         for (i = 0; i < N; i++){
             for (j = 0; j < N; j++){
                 d[i][j] = 0;     //Inicializacion de d
