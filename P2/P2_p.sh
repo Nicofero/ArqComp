@@ -1,9 +1,8 @@
 gcc -o II -O0 p2_apartado2.c
-gcc -o III -mavx2 p2_apartado3.c
+    gcc -O0 p2_apartado2_block.c -o IIb
 
-echo -e "II"
-./II 250 ex.r>a.txt
-echo -e "\n---------------------------------------\nIII"
-./III 250 ex.r>t.txt
-
-diff a.txt t.txt
+echo -n "C2_b=c(">>ex.r
+for i in 250 500 700 1000 1500 2000 2550 3000
+do
+    ./IIb $i ex.r>>log2.log
+done
