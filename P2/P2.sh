@@ -4,7 +4,7 @@ gcc -o III -mavx2 p2_apartado3.c
 gcc -o IV -fopenmp -O0 p2_apartado4.c
 rm ex.r 
 rm *.log
-echo  -e "N=c(250, 500, 700, 1000, 1500, 2000, 2550, 3000)\n">>ex.r
+echo  -e "N=c(250-mavx2, 500, 700, 1000, 1500, 2000, 2550, 3000)\n">>ex.r
 echo -n "C1=c(">>ex.r
 for i in 250 500 700 1000 1500 2000 2550 3000
 do

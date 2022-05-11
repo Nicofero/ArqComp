@@ -126,20 +126,16 @@ int main(int argc, char *argv[]){
         ind[k] = j;
     }
 
-    //for(j=0;j<8;j++){for(i=0;i<N;i++) {printf("%lf ",b[j][i]);} printf("\n");}
     printf("N=%d\n",N);
     for(l=0;l<10;l++){
         start_counter();
 
-        // Inicialización de d
-        /*
-        for (i = 0; i < N; i++){ //filas
-            for (j = 0; j < N; j++){ // columnas
-                d[i*N + j] = 0;
-            }
-        }*/
+
+        //Paraleliza la seccion indicada entre el número de hilos (num_threads) dado
         #pragma omp parallel private(i,j) num_threads(nT)
         {
+        //Lo que hacemos es indicar que se quiere paralelizar ese for
+        //En caso de usar collapse, se paralelizarian ambos bucles
         #pragma omp for//podria usarse #pragma omp for collapse(2), pero tras varias pruebas vimos que esto era mas ligeramente mas rapido
         for (i = 0; i < N; i++){
             for (j = 0; j < N; j++){
@@ -167,6 +163,7 @@ int main(int argc, char *argv[]){
             e[i+2] = d[ind[i+2]][ind[i+2]] / 2;
             e[i+3] = d[ind[i+3]][ind[i+3]] / 2;
             e[i+4] = d[ind[i+4]][ind[i+4]] / 2;
+            //Esa región solo puede ser ejecutada a la vez por un thread(así evitamos carreras críticas)
             #pragma omp atomic
             f += e[i] + e[i+1] + e[i+2] + e[i+3] + e[i+4];
         }

@@ -160,7 +160,8 @@ int main(int argc, char *argv[]){
             }
         }
         for (i = 0,f=0; i < N; i+=5){
-            //Realizar este bucle mediante procesamiento vectorial no produce ninguna mejora con respecto a este modo
+            //Realizar este bucle mediante procesamiento vectorial no produce ninguna mejora con respecto a este 
+            //modo porque se acceden a posiciones de memoria no contiguas.
             e[i] = d[ind[i]][ind[i]] / 2;
             e[i+1] = d[ind[i+1]][ind[i+1]] / 2;
             e[i+2] = d[ind[i+2]][ind[i+2]] / 2;
